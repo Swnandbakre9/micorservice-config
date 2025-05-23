@@ -1,9 +1,7 @@
 name: Simple Workflow
 
 on:
-  push:
-    branches:
-      - '*'   # Run on every branch
+  workflow_dispatch:
 
 jobs:
   say-hello:
