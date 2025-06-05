@@ -6,6 +6,10 @@ on:
       base_branch:
         description: 'Branch to compare from (Base)'
         required: true
+        type: choice
+        options:
+          - main
+          - TestWorkflow
       compare_branch:
         description: 'Branch to compare against (Target)'
         required: true
