@@ -13,6 +13,10 @@ on:
       compare_branch:
         description: 'Branch to compare against (Target)'
         required: true
+        type: choice
+        options:
+          - main
+          - TestWorkflow
       file_path:
         description: 'Path of file to compare (e.g., src/app/config.yaml)'
         required: true
