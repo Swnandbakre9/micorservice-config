@@ -2,7 +2,16 @@ name: Simple Workflow
 
 on:
   workflow_dispatch:
-
+    inputs:
+      base_branch:
+        description: 'Branch to compare from (Base)'
+        required: true
+      compare_branch:
+        description: 'Branch to compare against (Target)'
+        required: true
+      file_path:
+        description: 'Path of file to compare (e.g., src/app/config.yaml)'
+        required: true
 jobs:
   say-hello:
     runs-on: ubuntu-latest
