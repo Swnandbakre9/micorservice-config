@@ -60,32 +60,32 @@ jobs:
           for f in compare_chunks/*; do mv "$f" "$f.xml"; done
 
           python3 <<EOF
-            import difflib, os, glob
-            
-            base_files = sorted(glob.glob('base_chunks/*.xml'))
-            compare_files = sorted(glob.glob('compare_chunks/*.xml'))
-            
-            os.makedirs('html_output', exist_ok=True)
-            
-            for i in range(max(len(base_files), len(compare_files))):
-                left = open(base_files[i], 'r').readlines() if i < len(base_files) else []
-                right = open(compare_files[i], 'r').readlines() if i < len(compare_files) else []
-            
-                diff = difflib.HtmlDiff().make_file(left, right, fromdesc=f"Base pkg_{i}", todesc=f"Compare pkg_{i}")
-            
-                with open(f"html_output/diff_{i:03}.html", "w") as f:
-                    f.write(diff)
-            
-            with open("html_output/index.html", "w") as index:
-                index.write("<html><body><h2>Package Diff Index</h2><ul>")
-                for f in sorted(glob.glob("html_output/diff_*.html")):
-                    name = os.path.basename(f)
-                    index.write(f"<li><a href='{name}'>{name}</a></li>")
-                index.write("</ul></body></html>")
-            EOF
+          import difflib, os, glob
+          
+          base_files = sorted(glob.glob('base_chunks/*.xml'))
+          compare_files = sorted(glob.glob('compare_chunks/*.xml'))
+          
+          os.makedirs('html_output', exist_ok=True)
+          
+          for i in range(max(len(base_files), len(compare_files))):
+              left = open(base_files[i], 'r').readlines() if i < len(base_files) else []
+              right = open(compare_files[i], 'r').readlines() if i < len(compare_files) else []
+          
+              diff = difflib.HtmlDiff().make_file(left, right, fromdesc=f"Base pkg_{i}", todesc=f"Compare pkg_{i}")
+          
+              with open(f"html_output/diff_{i:03}.html", "w") as f:
+                  f.write(diff)
+          
+          with open("html_output/index.html", "w") as index:
+              index.write("<html><body><h2>Package Diff Index</h2><ul>")
+              for f in sorted(glob.glob("html_output/diff_*.html")):
+                  name = os.path.basename(f)
+                  index.write(f"<li><a href='{name}'>{name}</a></li>")
+              index.write("</ul></body></html>")
+          EOF
 
       - name: Upload Diff HTML as Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: sap-idm-vimdiff-html
           path: html_output/
