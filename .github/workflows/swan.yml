@@ -3,40 +3,25 @@ name: SAP IDM XML Diff (vimdiff-style)
 on:
   workflow_dispatch:
     inputs:
-      base_branch:
-        required: true
-        type: choice
-        options: [Development, Test, Production]
-      compare_branch:
-        required: true
-        type: choice
-        options: [Development, Test, Production]
       file_path:
         required: true
-        description: 'Path to XML file (e.g., testdata/compare.xml)'
+        description: 'Path to compare XML file (e.g., testdata/compare.xml)'
 
 jobs:
   xml-visual-diff:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Compare Branch
+      - name: Checkout main branch
         uses: actions/checkout@v3
         with:
-          ref: ${{ inputs.compare_branch }}
+          ref: main
           fetch-depth: 1
 
-      - name: Checkout Base Branch
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ inputs.base_branch }}
-          path: base
-          fetch-depth: 1
-
-      - name: Copy XML files
+      - name: Copy XML files from repo
         run: |
           cp ${{ inputs.file_path }} compare.xml
-          cp base/${{ inputs.file_path }} base.xml
+          cp $(dirname ${{ inputs.file_path }})/base.xml base.xml
 
       - name: Setup Python and dependencies
         run: |
@@ -59,7 +44,7 @@ jobs:
           for f in base_chunks/*; do mv "$f" "$f.xml"; done
           for f in compare_chunks/*; do mv "$f" "$f.xml"; done
 
-          python3 <<EOF
+                    python3 <<EOF
           import difflib, os, glob
           
           base_files = sorted(glob.glob('base_chunks/*.xml'))
