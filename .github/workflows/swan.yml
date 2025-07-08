@@ -1,4 +1,4 @@
-name: SAP IDM XML Diff (Single Main Branch)
+name: SAP IDM XML Diff (Grouped Packages)
 
 on:
   workflow_dispatch:
@@ -23,29 +23,36 @@ jobs:
           cp ${{ inputs.file_path }} compare.xml
           cp $(dirname ${{ inputs.file_path }})/base.xml base.xml
 
-      - name: Setup Python and dependencies
+      - name: Setup Python
         run: |
           python3 -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
 
-      - name: Split XML and generate HTML diff
+      - name: Split and generate HTML diffs
         run: |
           source venv/bin/activate
           mkdir -p base_chunks compare_chunks html_output
 
-          # Extract <Package> blocks
+          # Extract only <Package> blocks
           awk '/<Package>/,/<\/Package>/' base.xml > base_packages.xml
           awk '/<Package>/,/<\/Package>/' compare.xml > compare_packages.xml
 
-          # Split into chunks per package
-          csplit -f base_chunks/pkg_ -n 4 base_packages.xml '/<Package>/' '{*}' || true
-          csplit -f compare_chunks/pkg_ -n 4 compare_packages.xml '/<Package>/' '{*}' || true
+          # Split base.xml into chunks of 50 <Package> blocks
+          awk '
+            /<Package>/ {p=1; count++}
+            p { print > sprintf("base_chunks/pkg_%04d.xml", int((count-1)/50)) }
+            /<\/Package>/ {p=0}
+          ' base_packages.xml
 
-          for f in base_chunks/*; do mv "$f" "$f.xml"; done
-          for f in compare_chunks/*; do mv "$f" "$f.xml"; done
+          # Split compare.xml into chunks of 50 <Package> blocks
+          awk '
+            /<Package>/ {p=1; count++}
+            p { print > sprintf("compare_chunks/pkg_%04d.xml", int((count-1)/50)) }
+            /<\/Package>/ {p=0}
+          ' compare_packages.xml
 
-          # Python script to generate HTML diffs per pair
+          # Python diff to generate HTML like vimdiff
           python3 <<EOF
           import os, difflib, glob
           
